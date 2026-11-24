@@ -632,7 +632,10 @@ let last=performance.now(),acc=0;
 function loop(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
  if(!paused){acc+=dt;while(acc>=1/60){step(1/120);step(1/120);update(1/60);acc-=1/60;}}
  render();requestAnimationFrame(loop);}
-document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));applyLang();resize();buildWorld(0);damageOn=false;
+document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));applyLang();
+// Offline: registrer service worker (virker på Vercel, ikke i forhåndsvisning)
+try{if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&window.top===window.self){addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}}catch(e){}
+resize();buildWorld(0);damageOn=false;
 requestAnimationFrame(loop);
 })();
 </script>
