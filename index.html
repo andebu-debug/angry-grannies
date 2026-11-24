@@ -61,6 +61,11 @@ h2{margin:0 0 6px;font-size:36px;color:#d63c3c;-webkit-text-stroke:1px #7a2a2a}
 #menu .mb .big{font-family:Impact,"Arial Black",sans-serif;letter-spacing:2px;background:linear-gradient(#ffe066,#f0a818);box-shadow:0 6px 0 #8a5a08,0 0 30px rgba(255,160,40,.8);animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{50%{transform:scale(1.06)}}
 #menu .wp{color:#fff;opacity:.7;text-shadow:0 1px 3px #000;margin:0}
+.langs{position:absolute;top:calc(14px + env(safe-area-inset-top));right:calc(14px + env(safe-area-inset-right));display:flex;gap:6px}
+.langs.inl{position:static;justify-content:center;margin:0 0 12px}
+.langs button{background:rgba(18,8,31,.6);color:#fff;font-weight:bold;font-size:15px;padding:8px 14px;border-radius:14px;border:2px solid rgba(255,255,255,.5)}
+.langs.inl button{background:#eee;color:#5a2a2a;border-color:#ccc}
+.langs button.on{background:#ffd84a;color:#3a0610;border-color:#3a0610}
 #rotate{position:fixed;inset:0;background:#5fb4ee;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-weight:bold;font-size:22px;padding:30px;z-index:50;text-shadow:0 2px 0 rgba(0,0,0,.3)}
 #rotate .ph{font-size:70px;animation:rot 2s infinite}
 @keyframes rot{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
@@ -72,7 +77,7 @@ h2{margin:0 0 6px;font-size:36px;color:#d63c3c;-webkit-text-stroke:1px #7a2a2a}
 <div id="hud" class="hidden">
   <div class="tl">
     <button id="bPause" aria-label="Pause">❚❚</button>
-    <button id="bRestart" aria-label="Start på nytt">↻</button>
+    <button id="bRestart" aria-label="Restart">↻</button>
     <button id="bMute" aria-label="Lyd">🔊</button>
   </div>
   <div class="tr"><div id="lvl">Nivå 1</div><div id="score">0</div></div>
@@ -80,19 +85,20 @@ h2{margin:0 0 6px;font-size:36px;color:#d63c3c;-webkit-text-stroke:1px #7a2a2a}
 </div>
 
 <div id="menu" class="ov">
-  <div class="mt"><h1>ANGRY<br>GRANNIES</h1><div class="sub">Sinte bestemødre</div></div>
+  <div class="mt"><h1>ANGRY<br>GRANNIES</h1><div class="sub" data-t="sub"></div></div>
+  <div class="langs"><button data-lang="no">Norsk</button><button data-lang="en">English</button></div>
   <div class="mb">
-    <p class="story">Måkene har stjålet alle vaflene fra basaren. Nå er bestemødrene <b>RASENDE</b>.</p>
-    <button class="big" id="bPlay">SPILL ▶</button>
+    <p class="story" data-t="story"></p>
+    <button class="big" id="bPlay" data-t="play"></button>
     <p class="wp">Wåle production 2026</p>
   </div>
 </div>
 
 <div id="levels" class="ov hidden">
   <div class="card">
-    <h2>Velg nivå</h2>
+    <h2 data-t="choose"></h2>
     <div id="lvScroll"></div>
-    <button class="btn b" id="bBack">◀ Tilbake</button>
+    <button class="btn b" id="bBack" data-t="back"></button>
   </div>
 </div>
 
@@ -103,9 +109,9 @@ h2{margin:0 0 6px;font-size:36px;color:#d63c3c;-webkit-text-stroke:1px #7a2a2a}
     <div style="font-size:30px;font-weight:900" id="rScore">0</div>
     <div style="font-size:14px;margin-bottom:12px" id="rBest"></div>
     <div>
-      <button class="btn b" id="rMenu">☰ Nivåer</button>
-      <button class="btn" id="rRetry">↻ Igjen</button>
-      <button class="btn g" id="rNext">Neste ▶</button>
+      <button class="btn b" id="rMenu" data-t="levels"></button>
+      <button class="btn" id="rRetry" data-t="again"></button>
+      <button class="btn g" id="rNext" data-t="next"></button>
     </div>
   </div>
 </div>
@@ -113,17 +119,18 @@ h2{margin:0 0 6px;font-size:36px;color:#d63c3c;-webkit-text-stroke:1px #7a2a2a}
 <div id="pause" class="ov hidden">
   <div class="card">
     <h2>Pause</h2>
-    <p class="story">Bestemødrene tar en kaffepause ☕</p>
-    <button class="btn g" id="pResume">▶ Fortsett</button>
-    <button class="btn" id="pRetry">↻ Start på nytt</button>
-    <button class="btn b" id="pMenu">☰ Nivåer</button>
+    <p class="story" data-t="pausetxt"></p>
+    <div class="langs inl"><button data-lang="no">Norsk</button><button data-lang="en">English</button></div>
+    <button class="btn g" id="pResume" data-t="resume"></button>
+    <button class="btn" id="pRetry" data-t="restart"></button>
+    <button class="btn b" id="pMenu" data-t="levels"></button>
   </div>
 </div>
 
 <div id="rotate" class="hidden">
   <div class="ph">📱</div>
-  <p>Snu mobilen sidelengs<br>for best spill!</p>
-  <button class="btn g" id="bRotOk">Spill likevel</button>
+  <p data-t="rotate"></p>
+  <button class="btn g" id="bRotOk" data-t="playanyway"></button>
 </div>
 
 <script>
@@ -169,17 +176,51 @@ const MAT={
  glass:{d:0.6,f:0.3,e:0.1,hp:220,pts:300,snd:'glass'},
  stone:{d:2.4,f:0.8,e:0.05,hp:2200,pts:800,snd:'stone'},
  rock:{f:0.8,e:0.05},
- gull:{d:0.8,f:0.5,e:0.25,hp:260,pts:5000,snd:'gull'},
+ gull:{d:0.8,f:0.5,e:0.25,hp:230,pts:5000,snd:'gull'},
  granny:{d:2.2,f:0.5,e:0.3}
 };
+/* ---------------- SPRÅK / LANGUAGE ---------------- */
+let LANG='no';
+try{LANG=localStorage.getItem('ag_lang')||(/^(nb|nn|no)/i.test(navigator.language||'')?'no':'en');}catch(e){}
+if(LANG!=='no'&&LANG!=='en')LANG='no';
+const TXT={
+ no:{sub:'Sinte bestemødre',story:'Måkene har stjålet alle vaflene fra basaren. Nå er bestemødrene <b>RASENDE</b>.',play:'SPILL ▶',choose:'Velg nivå',back:'◀ Tilbake',levels:'☰ Nivåer',again:'↻ Igjen',next:'Neste ▶',
+  pausetxt:'Bestemødrene tar en kaffepause ☕',resume:'▶ Fortsett',restart:'↻ Start på nytt',rotate:'Snu mobilen sidelengs<br>for best spill!',playanyway:'Spill likevel',
+  level:'Nivå',tap:'👆 Trykk for å bruke evnen!',win:'VAFLENE ER REDDET!',winlast:'DU KNUSTE MÅKEKEISEREN!',lose:'Måkene beholdt vaflene…',points:'poeng',best:'Beste',sign:'VAFFELBASAR',
+  turbo:'TURBO-TOVE!',triple:'VI ER TRE!',bomb:'NÅ HOLDER DET!!',locale:'nb-NO',
+  launch:['UFF DA!','MINE VAFLER!!','NÅ SKAL DERE FÅ!','I MIN TID…!','FY SKAMME DERE!','KOM HIT, MÅKE!','JEG HAR STRIKKEPINNER!','HVOR ER BRILLENE?!','DETTE BLIR KLAGE!','BINGO!!'],
+  gull:['SKRÆÆ!','AU!','SKRIIK!','MINE VAFLER!'],
+  worlds:['Verden 1: Vaffelbasaren','Verden 2: Strikkeklubben','Verden 3: Bingohallen','Verden 4: Måkeøya'],
+  gt:{red:['Rasende Ragnhild','Ingen triks – bare rent raseri!'],turbo:['Turbo-Tove','Trykk mens hun flyr: TURBO!'],triple:['Trippel-Trine','Trykk mens hun flyr: blir til tre!'],bomb:['Eksplosive Edel','Trykk mens hun flyr: BOOM!']}},
+ en:{sub:'Furious grandmas',story:'The gulls have stolen all the waffles from the bake sale. Now the grannies are <b>FURIOUS</b>.',play:'PLAY ▶',choose:'Choose level',back:'◀ Back',levels:'☰ Levels',again:'↻ Retry',next:'Next ▶',
+  pausetxt:'The grannies are on a coffee break ☕',resume:'▶ Resume',restart:'↻ Restart',rotate:'Turn your phone sideways<br>for the best experience!',playanyway:'Play anyway',
+  level:'Level',tap:'👆 Tap to use her power!',win:'THE WAFFLES ARE SAVED!',winlast:'YOU CRUSHED THE GULL EMPEROR!',lose:'The gulls kept the waffles…',points:'points',best:'Best',sign:'WAFFLE SALE',
+  turbo:'TURBO TOVE!',triple:'WE ARE THREE!',bomb:"THAT'S IT!!",locale:'en-GB',
+  launch:['OH DEAR!','MY WAFFLES!!',"NOW YOU'LL GET IT!",'IN MY DAY…!','SHAME ON YOU!','COME HERE, GULL!','I HAVE KNITTING NEEDLES!','WHERE ARE MY GLASSES?!',"I'LL COMPLAIN!",'BINGO!!'],
+  gull:['SQUAWK!','OUCH!','SKRAAWK!','MY WAFFLES!'],
+  worlds:['World 1: Waffle Bake Sale','World 2: Knitting Club','World 3: Bingo Hall','World 4: Gull Island'],
+  gt:{red:['Raging Ragnhild','No tricks – just pure rage!'],turbo:['Turbo Tove','Tap while she flies: TURBO!'],triple:['Triple Trine','Tap while she flies: becomes three!'],bomb:['Explosive Edel','Tap while she flies: BOOM!']}}};
+const LV_EN=['The Bake Sale','Stacked','Three Huts','Stone Fort','The Tower','The Bridge','The Bunker','Gull Boss',
+ 'Ball of Yarn','Knitting Needles','The Hill','The Pyramid','Double Tower','Wobbly Bridge','Glasshouse','Stone Wall','Vertigo','Knitting Boss',
+ 'BINGO!','High-Rise','The Twins','Pyramids','Dominoes','Fortress','The Stacks','Bell Tower','The Maze','Bingo King',
+ 'Lighthouse','Boathouse','The Cliffs','The Storm','Bunker 2','Tower Hop','Rock Pile','Rope Bridge','Gull Castle','Gull Emperor'];
+function tx(k){return TXT[LANG][k];}
+function lvName(i){return LANG==='en'?LV_EN[i]:LEVELS[i].name;}
+function gtName(t){return TXT[LANG].gt[t][0];}
+function gtInfo(t){return TXT[LANG].gt[t][1];}
+function fmt(n){return n.toLocaleString(tx('locale'));}
+function applyLang(){document.documentElement.lang=LANG==='en'?'en':'no';
+ document.querySelectorAll('[data-t]').forEach(e=>{e.innerHTML=tx(e.dataset.t);});
+ document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('on',b.dataset.lang===LANG));
+ if(state==='levels')buildGrid();
+ if(state==='play'){$('lvl').textContent=tx('level')+' '+(levelIdx+1)+' – '+lvName(levelIdx);updateHint();}}
+function setLang(l){LANG=l;try{localStorage.setItem('ag_lang',l);}catch(e){}applyLang();}
 const GT={
  red:{name:'Rasende Ragnhild',col:'#d63c3c',r:26,info:'Ingen triks – bare rent raseri!'},
  turbo:{name:'Turbo-Tove',col:'#f0c12c',r:25,info:'Trykk mens hun flyr: TURBO!'},
  triple:{name:'Trippel-Trine',col:'#3b8fe0',r:19,info:'Trykk mens hun flyr: blir til tre!'},
  bomb:{name:'Eksplosive Edel',col:'#3a3340',r:29,info:'Trykk mens hun flyr: BOOM!'}
 };
-const LAUNCH_TXT=['UFF DA!','MINE VAFLER!!','NÅ SKAL DERE FÅ!','I MIN TID…!','FY SKAMME DERE!','KOM HIT, MÅKE!','JEG HAR STRIKKEPINNER!','HVOR ER BRILLENE?!','DETTE BLIR KLAGE!','BINGO!!'];
-const GULL_TXT=['SKRÆÆ!','AU!','SKRIIK!','MINE VAFLER!'];
 
 /* ---------------- FYSIKK ---------------- */
 let bodies=[],nid=1,damageOn=true;
@@ -247,7 +288,7 @@ function step(dt){
   const vt=relV(c,p,tx,ty);const dT0=p.mt*(-vt);const mx=c.f*p.Pn;const T0=p.Pt;p.Pt=Math.max(-mx,Math.min(mx,T0+dT0));applyI(c,p,(p.Pt-T0)*tx,(p.Pt-T0)*ty);}}
  for(const b of bodies){if(b.im===0||b.sleep)continue;b.x+=b.vx*dt;b.y+=b.vy*dt;b.a+=b.av*dt;
   if(!b.nosleep){if(Math.abs(b.vx)+Math.abs(b.vy)<10&&Math.abs(b.av)<0.2){b.st+=dt;if(b.st>0.5){b.sleep=true;b.vx=b.vy=b.av=0;}}else b.st=0;}}
- for(const b of bodies){if(b.dmg>0){if(b.hp!==Infinity&&!b.dead){b.hp-=b.dmg;if(b.hp<=0)kill(b);else if(b.kind==='gull'&&b.dmg>25&&Math.random()<0.6)bubble(b,pick(GULL_TXT),0.9);}b.dmg=0;}}
+ for(const b of bodies){if(b.dmg>0){if(b.hp!==Infinity&&!b.dead){b.hp-=b.dmg;if(b.hp<=0)kill(b);else if(b.kind==='gull'&&b.dmg>25&&Math.random()<0.6)bubble(b,pick(tx('gull')),0.9);}b.dmg=0;}}
  if(hitMax>40&&performance.now()-lastHit>90){lastHit=performance.now();SFX[hitSnd]&&SFX[hitSnd]();}
  if(bodies.some(b=>b.dead))bodies=bodies.filter(b=>!b.dead);
 }
@@ -272,7 +313,7 @@ function Bx(x,yb,w,h,mat){const b=mkBody({shape:'b',x,y:G-yb-h/2,w,h,mat});b.sle
 function post(x,yb,h,mat){return Bx(x,yb,20,h,mat);}
 function plank(x,yb,w,mat){return Bx(x,yb,w,20,mat);}
 function hut(cx,yb,w,h,mat,roof){post(cx-w/2+10,yb,h,mat);post(cx+w/2-10,yb,h,mat);plank(cx,yb+h,w,roof||mat);return yb+h+20;}
-function gull(x,yb,boss){const r=boss?27:18;const b=mkBody({shape:'c',x,y:G-yb-r,r,mat:'gull',kind:'gull'});b.adamp=0.9;b.sleep=true;if(boss){b.hp=b.maxhp=(typeof boss==='number'?boss:900);b.boss=true;}return b;}
+function gull(x,yb,boss){const r=boss?27:18;const b=mkBody({shape:'c',x,y:G-yb-r,r,mat:'gull',kind:'gull'});b.adamp=0.9;b.sleep=true;if(boss){b.hp=b.maxhp=Math.round((typeof boss==='number'?boss:900)*0.88);b.boss=true;}return b;}
 function rock(x,yb,w,h){return mkBody({shape:'b',x,y:G-yb-h/2,w,h,mat:'rock',static:true,kind:'rock'});}
 // tårn av hytter med en måke i hver etasje (og evt. en på toppen)
 function tower(cx,yb,floors,w,h,mats,top=true){for(let i=0;i<floors;i++){hut(cx,yb,w,h,mats[i%mats.length]);gull(cx,yb);yb+=h+20;}if(top)gull(cx,yb);return yb;}
@@ -362,25 +403,25 @@ function buildWorld(i){bodies=[];particles=[];popups=[];bubbles=[];nid=1;
  LEVELS[i].build();nGulls=bodies.filter(b=>b.kind==='gull').length;nBoss=bodies.filter(b=>b.boss).length;}
 function startLevel(i){levelIdx=i;buildWorld(i);queue=LEVELS[i].g.slice();score=0;addScore(0);damageOn=true;
  active=[];phase='aim';cur=queue.shift();dragging=false;pullX=pullY=0;
- state='play';paused=false;showOv(null);$('hud').classList.remove('hidden');$('lvl').textContent='Nivå '+(i+1)+' – '+LEVELS[i].name;updateHint();}
-function addScore(n){score+=n;$('score').textContent=score.toLocaleString('nb-NO');}
+ state='play';paused=false;showOv(null);$('hud').classList.remove('hidden');$('lvl').textContent=tx('level')+' '+(i+1)+' – '+lvName(i);updateHint();}
+function addScore(n){score+=n;$('score').textContent=fmt(score);}
 function updateHint(){const h=$('hint');if(state!=='play'){h.classList.add('hidden');return;}h.classList.remove('hidden');
- if(phase==='aim'&&cur){h.textContent=GT[cur].name+' – '+GT[cur].info;}
- else if(phase==='fly'&&!abilityUsed&&active[0]&&active[0].gtype!=='red'){h.textContent='👆 Trykk for å bruke evnen!';}
+ if(phase==='aim'&&cur){h.textContent=gtName(cur)+' – '+gtInfo(cur);}
+ else if(phase==='fly'&&!abilityUsed&&active[0]&&active[0].gtype!=='red'){h.textContent=tx('tap');}
  else h.classList.add('hidden');}
 
 function launch(){const t=cur,T=GT[t];const g=mkBody({shape:'c',x:SX+pullX,y:SY+pullY,r:T.r,mat:'granny',kind:'granny'});
  g.gtype=t;g.nosleep=true;g.vx=-pullX*LAUNCH_K;g.vy=-pullY*LAUNCH_K;g.av=-0.002*g.vx;
  active=[g];cur=null;phase='fly';turnT=0;noGullT=0;abilityUsed=false;
- SFX.launch();setTimeout(SFX.granny,120);bubble(g,pick(LAUNCH_TXT),1.3);pullX=pullY=0;updateHint();}
+ SFX.launch();setTimeout(SFX.granny,120);bubble(g,pick(tx('launch')),1.3);pullX=pullY=0;updateHint();}
 
 function useAbility(){const g=active[0];if(!g||g.dead||abilityUsed)return;const t=g.gtype;if(t==='red')return;abilityUsed=true;
- if(t==='turbo'){const sp=Math.hypot(g.vx,g.vy)||1;const ns=Math.max(sp*1.9,1250);g.vx=g.vx/sp*ns;g.vy=g.vy/sp*ns;SFX.power();bubble(g,'TURBO-TOVE!',1);smoke(g.x,g.y,10,'rgba(255,230,120,.9)',200);}
+ if(t==='turbo'){const sp=Math.hypot(g.vx,g.vy)||1;const ns=Math.max(sp*1.9,1250);g.vx=g.vx/sp*ns;g.vy=g.vy/sp*ns;SFX.power();bubble(g,tx('turbo'),1);smoke(g.x,g.y,10,'rgba(255,230,120,.9)',200);}
  else if(t==='triple'){SFX.split();for(const ang of [-0.24,0.24]){const c=Math.cos(ang),s=Math.sin(ang);const n=mkBody({shape:'c',x:g.x,y:g.y,r:g.r,mat:'granny',kind:'granny'});n.gtype='triple';n.nosleep=true;n.vx=g.vx*c-g.vy*s;n.vy=g.vx*s+g.vy*c;n.y+=ang*40;active.push(n);}
-   bubble(g,'VI ER TRE!',1);smoke(g.x,g.y,8);}
+   bubble(g,tx('triple'),1);smoke(g.x,g.y,8);}
  else if(t==='bomb'){explode(g);}
  updateHint();}
-function explode(g){const R=230;SFX.boom();shake=16;bubble(g,'NÅ HOLDER DET!!',0.8);
+function explode(g){const R=230;SFX.boom();shake=16;bubble(g,tx('bomb'),0.8);
  for(let i=0;i<26;i++){const a=Math.random()*TAU,s=Math.random()*380;particles.push({x:g.x,y:g.y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:0.5+Math.random()*0.5,col:pick(['#ffcc33','#ff7a1a','#e63c1a','#fff2a0']),size:14+Math.random()*22,g:-0.1,t:'s'});}
  smoke(g.x,g.y,14,'rgba(90,90,90,.7)',160);
  for(const b of bodies){if(b.im===0||b===g||b.dead)continue;const dx=b.x-g.x,dy=b.y-g.y,d=Math.hypot(dx,dy);if(d>R)continue;const k=1-d/R;wake(b);
@@ -397,10 +438,10 @@ function showResult(){const win=state==='win';const i=levelIdx;
  const base=nGulls*5000+nBoss*10000;const s2=base+4000,s3=base+13000;
  const stars=win?(score>=s3?3:score>=s2?2:1):0;
  if(win){save.stars[i]=Math.max(save.stars[i]||0,stars);save.best[i]=Math.max(save.best[i]||0,score);save.unlocked=Math.max(save.unlocked,Math.min(LEVELS.length,i+2));persist();}
- $('rTitle').textContent=win?(i===LEVELS.length-1?'DU KNUSTE MÅKESJEFEN!':'VAFLENE ER REDDET!'):'Måkene beholdt vaflene…';
+ $('rTitle').textContent=win?(i===LEVELS.length-1?tx('winlast'):tx('win')):tx('lose');
  $('rStars').innerHTML=[0,1,2].map(k=>'<span class="'+(k<stars?'on':'off')+'">★</span>').join('');
- $('rScore').textContent=score.toLocaleString('nb-NO')+' poeng';
- $('rBest').textContent=save.best[i]?'Beste: '+save.best[i].toLocaleString('nb-NO'):'';
+ $('rScore').textContent=fmt(score)+' '+tx('points');
+ $('rBest').textContent=save.best[i]?tx('best')+': '+fmt(save.best[i]):'';
  $('rNext').classList.toggle('hidden',!win||i>=LEVELS.length-1);
  $('hud').classList.add('hidden');showOv('result');}
 
@@ -422,9 +463,9 @@ function updatePull(wx,wy){let dx,dy;if(dragMode==='abs'){dx=wx-SX;dy=wy-SY;}els
 const OVS=['menu','levels','result','pause'];
 function showOv(id){OVS.forEach(o=>$(o).classList.toggle('hidden',o!==id));}
 function openLevels(){state='levels';$('hud').classList.add('hidden');buildGrid();showOv('levels');}
-function buildGrid(){const wrap=$('lvScroll');wrap.innerHTML='';let gr=null;LEVELS.forEach((L,i)=>{const wi=WORLDS.findIndex(w=>w.from===i);if(wi>=0){const h=document.createElement('div');h.className='world';h.textContent=WORLDS[wi].name;wrap.appendChild(h);gr=document.createElement('div');gr.className='grid';wrap.appendChild(gr);}
+function buildGrid(){const wrap=$('lvScroll');wrap.innerHTML='';let gr=null;LEVELS.forEach((L,i)=>{const wi=WORLDS.findIndex(w=>w.from===i);if(wi>=0){const h=document.createElement('div');h.className='world';h.textContent=tx('worlds')[wi];wrap.appendChild(h);gr=document.createElement('div');gr.className='grid';wrap.appendChild(gr);}
  const b=document.createElement('button');const locked=i>=save.unlocked;b.className='lv'+(locked?' locked':'');
- const st=save.stars[i]||0;b.innerHTML=(locked?'🔒':(i+1))+'<small>'+L.name+'</small><span class="st">'+(locked?'&nbsp;':'★'.repeat(st)+'☆'.repeat(3-st))+'</span>';
+ const st=save.stars[i]||0;b.innerHTML=(locked?'🔒':(i+1))+'<small>'+lvName(i)+'</small><span class="st">'+(locked?'&nbsp;':'★'.repeat(st)+'☆'.repeat(3-st))+'</span>';
  if(!locked)b.onclick=()=>{ac();startLevel(i);};gr.appendChild(b);});}
 $('bPlay').onclick=()=>{ac();openLevels();};
 $('bBack').onclick=()=>{state='menu';showOv('menu');buildWorld(0);damageOn=false;};
@@ -546,7 +587,7 @@ function drawBG(wx0,wx1,wy0){
  for(const [x,s] of [[-220,1.1],[-120,0.8],[650,0.9],[730,1.2],[1500,1],[1590,0.75],[1700,1.15],[1820,0.9],[1950,1.1]])fir(x,s);
  // basar-skilt
  ctx.fillStyle='#7a4b1e';ctx.fillRect(18,G-120,8,120);ctx.fillRect(128,G-120,8,120);ctx.fillStyle='#fff8ec';rrect(4,G-150,146,46,8);ctx.fill();ctx.strokeStyle='#7a2a2a';ctx.lineWidth=3;ctx.stroke();
- ctx.fillStyle='#d63c3c';ctx.font='bold 17px "Trebuchet MS",Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('VAFFELBASAR',77,G-126);
+ ctx.fillStyle='#d63c3c';ctx.font='bold 17px "Trebuchet MS",Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(tx('sign'),77,G-126);
  // bakke
  ctx.fillStyle='#8b5a30';ctx.fillRect(wx0-10,G+14,wx1-wx0+20,400);ctx.fillStyle='#5cae3c';ctx.fillRect(wx0-10,G,wx1-wx0+20,16);
  ctx.fillStyle='#4c9a30';for(let x=Math.floor(wx0/37)*37;x<wx1;x+=37){ctx.beginPath();ctx.moveTo(x,G+2);ctx.lineTo(x+5,G-8);ctx.lineTo(x+10,G+2);ctx.fill();}}
@@ -591,7 +632,7 @@ let last=performance.now(),acc=0;
 function loop(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
  if(!paused){acc+=dt;while(acc>=1/60){step(1/120);step(1/120);update(1/60);acc-=1/60;}}
  render();requestAnimationFrame(loop);}
-resize();buildWorld(0);damageOn=false;
+document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));applyLang();resize();buildWorld(0);damageOn=false;
 requestAnimationFrame(loop);
 })();
 </script>
